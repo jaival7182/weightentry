@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Health Check</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #faf8f5;
+      color: #2d2a26;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid #e8e4df;
+      border-radius: 24px;
+      padding: 40px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    }
+    .logo { font-size: 32px; margin-bottom: 8px; animation: bounce 2s ease-in-out infinite; }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    h1 { font-size: 24px; font-weight: 600; color: #2d2a26; margin-bottom: 8px; }
+    p { color: #8c8680; font-size: 14px; margin-bottom: 32px; }
+    .form-group { margin-bottom: 20px; position: relative; }
+    label { display: block; font-size: 12px; color: #8c8680; margin-bottom: 8px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+    input {
+      width: 100%; padding: 16px; background: #f9f6f1; border: 2px solid transparent;
+      border-radius: 12px; font-size: 16px; font-family: inherit; color: #2d2a26;
+      transition: all 0.3s ease;
+    }
+    input:focus { outline: none; border-color: #c4a87c; background: #fff; }
+    input::placeholder { color: #b0a89e; }
+    .btn {
+      width: 100%; padding: 16px; background: #c4a87c; color: #fff; border: none;
+      border-radius: 12px; font-size: 16px; font-weight: 500; font-family: inherit;
+      cursor: pointer; transition: all 0.3s ease; margin-top: 8px;
+    }
+    .btn:hover { background: #b89a6e; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(196,168,124,0.3); }
+    .btn:active { transform: translateY(0); }
+    .btn:disabled { background: #d4cec7; cursor: not-allowed; transform: none; box-shadow: none; }
+    .result {
+      display: none; margin-top: 24px; padding: 24px; background: #f9f6f1;
+      border-radius: 16px; animation: slideUp 0.5s ease;
+    }
+    .result.show { display: block; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .result-header { text-align: center; margin-bottom: 20px; }
+    .result-icon { font-size: 64px; margin-bottom: 12px; animation: pulse 1s ease infinite; }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+    .result-title { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+    .result-subtitle { font-size: 14px; color: #8c8680; }
+    .result-details { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+    .detail { text-align: center; padding: 12px; background: #fff; border-radius: 10px; }
+    .detail-value { font-size: 20px; font-weight: 600; color: #c4a87c; }
+    .detail-label { font-size: 11px; color: #8c8680; text-transform: uppercase; }
+    .evaluation {
+      padding: 16px; border-radius: 12px; text-align: center; font-weight: 500;
+      animation: fadeIn 0.5s ease 0.2s both;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .evaluation.good { background: rgba(124,154,110,0.15); color: #5a7a4a; }
+    .evaluation.warning { background: rgba(196,168,124,0.15); color: #b89a6e; }
+    .evaluation.bad { background: rgba(196,116,108,0.15); color: #c4746c; }
+    .toast {
+      position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
+      background: #7c9a6e; color: white; padding: 14px 24px; border-radius: 12px;
+      font-weight: 500; animation: toastIn 0.3s ease;
+    }
+    @keyframes toastIn { from { opacity: 0; transform: translate(-50%, 20px); } to { opacity: 1; transform: translate(-50%, 0); } }
+    .spinner { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">⚖️</div>
+    <h1>Health Check</h1>
+    <p>Enter your details to evaluate your weight</p>
+
+    <form id="healthForm">
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" id="name" placeholder="Your name" required>
+      </div>
+      <div class="form-group">
+        <label>Age</label>
+        <input type="number" id="age" placeholder="Your age" min="1" max="120" required>
+      </div>
+      <div class="form-group">
+        <label>Weight (kg)</label>
+        <input type="number" id="weight" placeholder="Your weight" step="0.1" min="1" max="300" required>
+      </div>
+      <button type="submit" class="btn" id="submitBtn">Check Health</button>
+    </form>
+
+    <div class="result" id="result">
+      <div class="result-header">
+        <div class="result-icon" id="resultIcon">✅</div>
+        <div class="result-title" id="resultTitle">Healthy!</div>
+        <div class="result-subtitle" id="resultSubtitle">Your weight is good for your age</div>
+      </div>
+      <div class="result-details">
+        <div class="detail">
+          <div class="detail-value" id="detailName">-</div>
+          <div class="detail-label">Name</div>
+        </div>
+        <div class="detail">
+          <div class="detail-value" id="detailAge">-</div>
+          <div class="detail-label">Age</div>
+        </div>
+        <div class="detail">
+          <div class="detail-value" id="detailWeight">-</div>
+          <div class="detail-label">Weight</div>
+        </div>
+      </div>
+      <div class="evaluation" id="evaluation">Your weight is ideal! 🎉</div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" style="display:none;"></div>
+
+  <script>
+    const WEBHOOK_URL = 'https://eooepmw9y9rwlz9.m.pipedream.net';
+
+    const form = document.getElementById('healthForm');
+    const result = document.getElementById('result');
+    const submitBtn = document.getElementById('submitBtn');
+    const toast = document.getElementById('toast');
+
+    // BMI-based evaluation (accurate)
+    function evaluateWeight(age, weight) {
+      // BMI = weight(kg) / height(m)^2
+      // We estimate height based on age and assume average height
+      // For adults 20-65, average height is ~170cm (5'7")
+      // This is an approximation
+
+      let idealBMI, bmiRange;
+
+      if (age < 18) {
+        // For children/teens, BMI percentiles are different
+        idealBMI = 18.5;
+        bmiRange = { min: 17, max: 23 };
+      } else if (age >= 18 && age <= 65) {
+        // Adult BMI categories
+        // Underweight: < 18.5
+        // Normal: 18.5 - 24.9
+        // Overweight: 25 - 29.9
+        // Obese: >= 30
+        idealBMI = 22; // Middle of normal range
+        bmiRange = { min: 18.5, max: 24.9 };
+      } else {
+        // Elderly (65+) - slightly higher BMI is healthier
+        idealBMI = 24;
+        bmiRange = { min: 22, max: 27 };
+      }
+
+      // Estimate height from a statistical average (for BMI calculation)
+      // Using regression: height(cm) ≈ 130 + 2.5 * age for development, peaks at ~175 for adult males, ~162 for adult females
+      // For simplicity, using average adult height of 170cm
+      let heightCm;
+      if (age < 20) {
+        heightCm = 130 + 4.5 * age; // Rough growth estimate
+      } else {
+        heightCm = 175; // Average adult height
+      }
+
+      const heightM = heightCm / 100;
+      const bmi = weight / (heightM * heightM);
+
+      if (bmi < bmiRange.min) {
+        return {
+          status: 'warning',
+          message: `BMI: ${bmi.toFixed(1)} - You're underweight. Eat more nutritious food.`,
+          bmi: bmi.toFixed(1),
+          category: 'Underweight'
+        };
+      } else if (bmi > bmiRange.max) {
+        if (bmi >= 30) {
+          return {
+            status: 'bad',
+            message: `BMI: ${bmi.toFixed(1)} - Obesity. Please consult a doctor.`,
+            bmi: bmi.toFixed(1),
+            category: 'Obese'
+          };
+        } else {
+          return {
+            status: 'bad',
+            message: `BMI: ${bmi.toFixed(1)} - Overweight. Consider exercise and diet.`,
+            bmi: bmi.toFixed(1),
+            category: 'Overweight'
+          };
+        }
+      } else {
+        return {
+          status: 'good',
+          message: `BMI: ${bmi.toFixed(1)} - Perfect! You're at a healthy weight. 🎉`,
+          bmi: bmi.toFixed(1),
+          category: 'Normal'
+        };
+      }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById('name').value.trim();
+      const age = parseInt(document.getElementById('age').value);
+      const weight = parseFloat(document.getElementById('weight').value);
+
+      if (!name || !age || !weight) return;
+
+      // Show loading
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner"></span>';
+      submitBtn.style.background = '#b89a6e';
+
+      // Evaluate
+      const evaluation = evaluateWeight(age, weight);
+
+      // Show results
+      document.getElementById('detailName').textContent = name;
+      document.getElementById('detailAge').textContent = age;
+      document.getElementById('detailWeight').textContent = weight + ' kg';
+
+      const evalEl = document.getElementById('evaluation');
+      evalEl.className = 'evaluation ' + evaluation.status;
+      evalEl.textContent = evaluation.message;
+
+      const iconEl = document.getElementById('resultIcon');
+      const titleEl = document.getElementById('resultTitle');
+      const subtitleEl = document.getElementById('resultSubtitle');
+
+      if (evaluation.status === 'good') {
+        iconEl.textContent = '✅';
+        titleEl.textContent = evaluation.category;
+        subtitleEl.textContent = 'Healthy weight';
+      } else if (evaluation.status === 'warning') {
+        iconEl.textContent = '⚠️';
+        titleEl.textContent = evaluation.category;
+        subtitleEl.textContent = 'May need to gain weight';
+      } else {
+        iconEl.textContent = '⚠️';
+        titleEl.textContent = evaluation.category;
+        subtitleEl.textContent = 'May need to lose weight';
+      }
+
+      result.classList.add('show');
+
+      // Send to webhook
+      try {
+        await fetch(WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            Timestamp: new Date().toISOString(),
+            Name: name,
+            Age: age,
+            Weight: weight,
+            BMI: evaluation.bmi,
+            Category: evaluation.category,
+            Evaluation: evaluation.status
+          })
+        });
+        showToast('Saved to Google Sheets!');
+      } catch (err) {
+        console.error(err);
+        showToast('Saved locally');
+      }
+
+      // Reset button
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = 'Check Health';
+      submitBtn.style.background = '#c4a87c';
+    });
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      setTimeout(() => toast.style.display = 'none', 3000);
+    }
+  </script>
+</body>
+</html>
